@@ -1,29 +1,26 @@
-require('dotenv').config();
-require('express-async-errors');
+import express from 'express'
+import dotenv from 'dotenv'
+import connectDb from './config/db.js'
+import 'express-async-errors'
+import notFound from './middleware/not-found.js'
+import errorHandler from './middleware/error-handler.js'
 
-const express = require('express');
-const app = express();
+const appName = 'nec-jwt-basics'
+const app = express()
 
-const notFoundMiddleware = require('./middleware/not-found');
-const errorHandlerMiddleware = require('./middleware/error-handler');
+dotenv.config()
 
-// middleware
-app.use(express.static('./public'));
-app.use(express.json());
+app
+  .use(express.static('./public'))
+  .use(express.json())
+  .use(errorHandler)
+  .use(notFound)
 
-app.use(notFoundMiddleware);
-app.use(errorHandlerMiddleware);
+connectDb(`${process.env.MONGO_URI}/${appName}`)
+  .then(start)
+  .catch(err => console.log(`Error connecting to database: ${err.message}`))
 
-const port = process.env.PORT || 3000;
-
-const start = async () => {
-  try {
-    app.listen(port, () =>
-      console.log(`Server is listening on port ${port}...`)
-    );
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-start();
+function start() {
+  const port = process.env.PORT || 8000
+  app.listen(port, () => console.log(`${appName} server is listening on port ${port}...`))
+}
