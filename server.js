@@ -4,6 +4,7 @@ import connectDb from './config/db.js'
 import 'express-async-errors'
 import notFound from './middleware/not-found.js'
 import errorHandler from './middleware/error-handler.js'
+import mainRouter from './routes/main.js'
 
 const appName = 'nec-jwt-basics'
 const app = express()
@@ -13,8 +14,9 @@ dotenv.config()
 app
   .use(express.static('./public'))
   .use(express.json())
-  .use(errorHandler)
+  .use('/api/v1', mainRouter)
   .use(notFound)
+  .use(errorHandler)
 
 connectDb(`${process.env.MONGO_URI}/${appName}`)
   .then(start)
